@@ -6,12 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"strings"
 	"text/tabwriter"
 
-	"github.com/linkerd/linkerd2/controller/api/public"
 	pb "github.com/linkerd/linkerd2/controller/gen/controller/discovery"
 	"github.com/linkerd/linkerd2/pkg/addr"
 	log "github.com/sirupsen/logrus"
@@ -94,7 +94,7 @@ requests.`,
 	return cmd
 }
 
-func requestEndpointsFromAPI(client public.APIClient) (*pb.EndpointsResponse, error) {
+func requestEndpointsFromAPI(client pb.DiscoveryClient) (*pb.EndpointsResponse, error) {
 	return client.Endpoints(context.Background(), &pb.EndpointsParams{})
 }
 
@@ -116,7 +116,7 @@ type rowEndpoint struct {
 	Service   string `json:"service"`
 }
 
-func writeEndpointsToBuffer(endpoints *pb.EndpointsResponse, w *tabwriter.Writer, options *endpointsOptions) {
+func writeEndpointsToBuffer(endpoints *pb.EndpointsResponse, w io.Writer, options *endpointsOptions) {
 	maxPodLength := len(podHeader)
 	maxNamespaceLength := len(namespaceHeader)
 	endpointsTables := map[string][]rowEndpoint{}
@@ -177,7 +177,7 @@ func writeEndpointsToBuffer(endpoints *pb.EndpointsResponse, w *tabwriter.Writer
 	}
 }
 
-func printEndpointsTables(endpointsTables map[string][]rowEndpoint, w *tabwriter.Writer, options *endpointsOptions, maxPodLength int, maxNamespaceLength int) {
+func printEndpointsTables(endpointsTables map[string][]rowEndpoint, w io.Writer, options *endpointsOptions, maxPodLength int, maxNamespaceLength int) {
 	firstTable := true // don't print a newline before the first table
 
 	for _, ns := range sortNamespaceKeys(endpointsTables) {
@@ -189,7 +189,7 @@ func printEndpointsTables(endpointsTables map[string][]rowEndpoint, w *tabwriter
 	}
 }
 
-func printEndpointsTable(namespace string, rows []rowEndpoint, w *tabwriter.Writer, options *endpointsOptions, maxPodLength int, maxNamespaceLength int) {
+func printEndpointsTable(namespace string, rows []rowEndpoint, w io.Writer, options *endpointsOptions, maxPodLength int, maxNamespaceLength int) {
 	headers := make([]string, 0)
 	templateString := "%s\t%d\t%s\t%s\t%s\n"
 
@@ -226,7 +226,7 @@ func printEndpointsTable(namespace string, rows []rowEndpoint, w *tabwriter.Writ
 	}
 }
 
-func printEndpointsJSON(endpointsTables map[string][]rowEndpoint, w *tabwriter.Writer) {
+func printEndpointsJSON(endpointsTables map[string][]rowEndpoint, w io.Writer) {
 	entries := []rowEndpoint{}
 
 	for _, ns := range sortNamespaceKeys(endpointsTables) {
