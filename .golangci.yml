@@ -7,6 +7,7 @@ linters:
   - deadcode
   - depguard
   - gofmt
+  - goimports
   - golint
   - gosimple
   - govet
@@ -22,7 +23,6 @@ linters:
   # - gochecknoinits
   # - goconst
   # - gocyclo
-  # - goimports
   # - gosec
   # - interfacer
   # - lll

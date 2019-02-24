@@ -8,7 +8,7 @@ import (
 	pb "github.com/linkerd/linkerd2/controller/gen/public"
 	"github.com/linkerd/linkerd2/pkg/k8s"
 	"github.com/prometheus/common/model"
-	apiv1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -381,7 +381,7 @@ func (s *grpcServer) getPodStats(obj runtime.Object) (*podStats, error) {
 	meshCount := &podStats{}
 
 	for _, pod := range pods {
-		if pod.Status.Phase == apiv1.PodFailed {
+		if pod.Status.Phase == corev1.PodFailed {
 			meshCount.failed++
 		} else {
 			meshCount.total++
@@ -414,7 +414,7 @@ func toPodError(container, image, reason, message string) *pb.PodErrors_PodError
 	}
 }
 
-func checkContainerErrors(containerStatuses []apiv1.ContainerStatus, containerName string) []*pb.PodErrors_PodError {
+func checkContainerErrors(containerStatuses []corev1.ContainerStatus, containerName string) []*pb.PodErrors_PodError {
 	errors := []*pb.PodErrors_PodError{}
 	for _, st := range containerStatuses {
 		if !st.Ready {
